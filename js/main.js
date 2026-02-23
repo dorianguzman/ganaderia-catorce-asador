@@ -50,16 +50,16 @@
       character: 'assets/generated/salsas-scene.webp',
       characterVideo: 'assets/generated/salsas-scene.mp4',
       accent: '#F44336',
-      quote: 'Incluidas con tu pedido'
+      quote: 'El toque que le faltaba a tu taco!'
     }
   };
 
-  // Tab labels: emoji + short name for compact pills
+  // Tab labels: emoji + full name for pills
   var TAB_LABELS = {
     tacos:          { emoji: '🌮', short: 'Tacos' },
-    quesadillas:    { emoji: '🧀', short: 'Quesas' },
+    quesadillas:    { emoji: '🧀', short: 'Quesadillas' },
     charolas:       { emoji: '🥩', short: 'Charolas' },
-    especialidades: { emoji: '⭐', short: 'Espec.' },
+    especialidades: { emoji: '⭐', short: 'Especialidades' },
     bebidas:        { emoji: '🥤', short: 'Bebidas' },
     postres:        { emoji: '🍰', short: 'Postres' },
     salsas:         { emoji: '🌶️', short: 'Salsas' }
@@ -131,9 +131,7 @@
   }
 
   function renderTabs() {
-    // Build category IDs including salsas
     var catIds = menuData.categories.map(function (c) { return c.id; });
-    catIds.push('salsas');
     worldCount = catIds.length;
 
     // Render pill tabs
@@ -168,13 +166,9 @@
   function renderCategories() {
     var html = '';
 
-    // Render each menu category as a world
     menuData.categories.forEach(function (cat) {
       html += renderWorldHTML(cat);
     });
-
-    // Salsas world
-    html += renderSalsasWorldHTML();
 
     worldsTrack.innerHTML = html;
 
@@ -185,15 +179,19 @@
   function renderWorldHTML(cat) {
     var config = ZONE_CONFIG[cat.id] || {};
 
-    // Watermark background
-    var bgHTML = '';
-    if (config.character) {
-      bgHTML = '<div class="menu__world-bg"><img src="' + config.character + '" alt="" loading="lazy"></div>';
+    // Character video inline next to title
+    var characterHTML = '';
+    if (config.characterVideo) {
+      characterHTML = '<div class="menu__world-character">' +
+        '<video src="' + config.characterVideo + '" poster="' + (config.character || '') + '" autoplay loop muted playsinline loading="lazy"></video>' +
+      '</div>';
     }
 
-    // Header: title + quote (no name)
+    // Header: title + quote + character video
     var headerHTML = '<div class="menu__world-header">' +
-      '<h3 class="menu__world-title">' + (cat.icon || '') + ' ' + cat.name + '</h3>';
+      '<div class="menu__world-header-row">' +
+        '<div class="menu__world-header-text">' +
+          '<h3 class="menu__world-title">' + (cat.icon || '') + ' ' + cat.name + '</h3>';
 
     if (config.quote) {
       headerHTML += '<p class="menu__world-quote">"' + config.quote + '"</p>';
@@ -203,13 +201,7 @@
       headerHTML += '<p class="menu__category-desc">' + cat.description + '</p>';
     }
 
-    headerHTML += '</div>';
-
-    // Postres image
-    var postresImgHTML = '';
-    if (cat.id === 'postres') {
-      postresImgHTML = '<img src="assets/postres.png" alt="Postres" class="menu__postres-img" loading="lazy" style="position:relative;z-index:1;">';
-    }
+    headerHTML += '</div>' + characterHTML + '</div>' + '</div>';
 
     // Items grid
     var itemsHTML = cat.items.map(function (item) {
@@ -223,31 +215,9 @@
     }
 
     return '<div class="menu__world" data-zone="' + cat.id + '">' +
-      bgHTML +
       headerHTML +
-      postresImgHTML +
       '<div class="menu__items">' + itemsHTML + '</div>' +
       noteHTML +
-    '</div>';
-  }
-
-  function renderSalsasWorldHTML() {
-    var config = ZONE_CONFIG.salsas;
-    var bgHTML = '';
-    if (config.character) {
-      bgHTML = '<div class="menu__world-bg"><img src="' + config.character + '" alt="" loading="lazy"></div>';
-    }
-
-    return '<div class="menu__world menu__world--salsas" data-zone="salsas">' +
-      bgHTML +
-      '<div class="menu__world-header">' +
-        '<h3 class="menu__world-title">🌶️ Nuestras Salsas</h3>' +
-        '<p class="menu__world-quote">"' + config.quote + '"</p>' +
-        '<p class="menu__world--salsas salsas__subtitle">Incluidas con tu pedido</p>' +
-      '</div>' +
-      '<div class="salsas__image-wrap">' +
-        '<img src="assets/salsas.png" alt="Salsas del Asador Callejero Catorce" class="salsas__img" loading="lazy">' +
-      '</div>' +
     '</div>';
   }
 
@@ -268,7 +238,7 @@
 
     return '<div class="menu__item' + premiumClass + hasItemsClass + '" data-item-id="' + item.id + '">' +
       '<span class="menu__item-name">' + item.name + '</span>' +
-      '<span class="menu__item-price">$' + item.price + '</span>' +
+      '<span class="menu__item-price">' + (item.price === 0 ? 'Incluida' : '$' + item.price) + '</span>' +
       promoHTML +
       variantHTML +
       '<div class="stepper">' +
@@ -294,7 +264,7 @@
 
   function initSwipe() {
     worldsTrack.addEventListener('touchstart', onTouchStart, { passive: true });
-    worldsTrack.addEventListener('touchmove', onTouchMove, { passive: false });
+    worldsTrack.addEventListener('touchmove', onTouchMove, { passive: true });
     worldsTrack.addEventListener('touchend', onTouchEnd, { passive: true });
 
     // Keyboard navigation
@@ -330,7 +300,6 @@
     }
 
     if (isSwiping) {
-      e.preventDefault();
       touchDeltaX = dx;
 
       // Rubber-band at edges
@@ -469,7 +438,7 @@
   function playWorldEntrance(worldEl) {
     var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    var bg = worldEl.querySelector('.menu__world-bg');
+    var character = worldEl.querySelector('.menu__world-character');
     var title = worldEl.querySelector('.menu__world-title');
     var quote = worldEl.querySelector('.menu__world-quote');
     var desc = worldEl.querySelector('.menu__category-desc');
@@ -478,8 +447,6 @@
     var salsasWrap = worldEl.querySelector('.salsas__image-wrap');
 
     if (reducedMotion) {
-      // Show everything immediately
-      if (bg) bg.style.opacity = '0.06';
       if (title) title.style.opacity = '1';
       if (quote) quote.style.opacity = '1';
       if (desc) desc.style.opacity = '1';
@@ -491,7 +458,6 @@
     }
 
     if (typeof gsap === 'undefined') {
-      // Fallback without GSAP
       if (title) title.style.opacity = '1';
       if (quote) quote.style.opacity = '1';
       if (desc) desc.style.opacity = '1';
@@ -507,11 +473,11 @@
       }
     });
 
-    // Background scale-in
-    if (bg) {
-      tl.fromTo(bg,
-        { opacity: 0, scale: 1.2 },
-        { opacity: 0.06, scale: 1, duration: 0.6, ease: 'power3.out' }
+    // Character scale-in
+    if (character) {
+      tl.fromTo(character,
+        { opacity: 0, scale: 0.5 },
+        { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.7)' }
       );
     }
 
@@ -520,7 +486,7 @@
       tl.fromTo(title,
         { opacity: 0, y: 15 },
         { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' },
-        bg ? '-=0.3' : '0'
+        character ? '-=0.3' : '0'
       );
     }
 
@@ -589,12 +555,29 @@
     return null;
   }
 
+  function getSalsasCount() {
+    var count = 0;
+    var keys = Object.keys(cart);
+    for (var i = 0; i < keys.length; i++) {
+      if (cart[keys[i]].categoryId === 'salsas') count += cart[keys[i]].qty;
+    }
+    return count;
+  }
+
   function addToCart(id) {
+    // Check salsas limit before creating entry
+    var found = cart[id] ? null : findItemById(id);
+    var catId = cart[id] ? cart[id].categoryId : (found ? found.categoryId : null);
+    if (catId === 'salsas') {
+      if (cart[id] && cart[id].qty >= 1) return;
+      if (getSalsasCount() >= 2) return;
+    }
+
     if (!cart[id]) {
-      var found = findItemById(id);
       if (!found) return;
       cart[id] = { item: found.item, qty: 0, categoryName: found.categoryName, categoryId: found.categoryId };
     }
+
     cart[id].qty++;
     updateCartUI(id);
 
@@ -634,7 +617,7 @@
     var totalItems = 0;
     var keys = Object.keys(cart);
     for (var i = 0; i < keys.length; i++) {
-      totalItems += cart[keys[i]].qty;
+      if (cart[keys[i]].categoryId !== 'salsas') totalItems += cart[keys[i]].qty;
     }
     cartBadge.textContent = totalItems;
     cartFab.hidden = totalItems === 0;
@@ -858,7 +841,7 @@
           '<span class="stepper__count">' + entry.qty + '</span>' +
           '<button class="stepper__btn stepper__btn--plus" data-sheet-action="plus" data-id="' + entry.item.id + '" aria-label="Agregar uno">+</button>' +
         '</div>' +
-        '<span class="sheet-item__subtotal">$' + subtotal + '</span>' +
+        '<span class="sheet-item__subtotal">' + (subtotal > 0 ? '$' + subtotal : 'Incluida') + '</span>' +
       '</div>';
     }).join('');
 
@@ -916,7 +899,7 @@
     for (var i = 0; i < keys.length; i++) {
       var entry = cart[keys[i]];
       var subtotal = calculateItemSubtotal(entry.item, entry.qty);
-      var line = '- ' + entry.qty + 'x ' + entry.categoryName + ' ' + entry.item.name + ' ($' + subtotal + ')';
+      var line = '- ' + entry.qty + 'x ' + entry.categoryName + ' ' + entry.item.name + (subtotal > 0 ? ' ($' + subtotal + ')' : ' (incluida)');
       if (entry.item.promo && entry.qty >= entry.item.promo.qty) {
         var promoSets = Math.floor(entry.qty / entry.item.promo.qty);
         line += ' [' + promoSets + 'x promo ' + entry.item.promo.label + ']';
@@ -1004,6 +987,9 @@
       splitHeroTitle();
       document.querySelectorAll('.hero__letter').forEach(function (l) { l.style.opacity = '1'; });
 
+      // Show/hide nav on scroll (no GSAP)
+      initNavVisibility();
+
       // Still init swipe for navigation
       initSwipe();
       goToWorld(0);
@@ -1083,7 +1069,21 @@
       });
     }
 
-    // Section reveals (order-type, footer — salsas removed)
+    // Show/hide fixed nav when in menu section
+    var menuSection = document.getElementById('menu');
+    if (menuSection) {
+      ScrollTrigger.create({
+        trigger: menuSection,
+        start: 'top 80%',
+        end: 'bottom top',
+        onEnter: function () { menuNav.classList.add('is-visible'); },
+        onLeave: function () { menuNav.classList.remove('is-visible'); },
+        onEnterBack: function () { menuNav.classList.add('is-visible'); },
+        onLeaveBack: function () { menuNav.classList.remove('is-visible'); }
+      });
+    }
+
+    // Section reveals (order-type, footer)
     ['.order-type', '.footer'].forEach(function (selector) {
       var el = document.querySelector(selector);
       if (!el) return;
@@ -1107,6 +1107,17 @@
 
     // Recalculate height on resize
     window.addEventListener('resize', function () { updateWorldHeight(activeWorldIndex); });
+  }
+
+  function initNavVisibility() {
+    var menuSection = document.getElementById('menu');
+    if (!menuSection) return;
+    var threshold = window.innerHeight * 0.2;
+    window.addEventListener('scroll', function () {
+      var rect = menuSection.getBoundingClientRect();
+      var visible = rect.top <= threshold && rect.bottom > 0;
+      menuNav.classList.toggle('is-visible', visible);
+    }, { passive: true });
   }
 
   function splitHeroTitle() {

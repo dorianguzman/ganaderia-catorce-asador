@@ -102,7 +102,21 @@
       "name": "Postres",
       "icon": "🍰",
       "items": [
-        { "id": "pastel-3-leches", "name": "Pastel de 3 Leches", "price": 45 }
+        { "id": "pastel-cafe", "name": "3 Leches Cafe", "price": 45 },
+        { "id": "pastel-natural", "name": "3 Leches Natural", "price": 45 }
+      ]
+    },
+    {
+      "id": "salsas",
+      "name": "Salsas",
+      "icon": "🌶️",
+      "note": "Elige hasta 2 salsas incluidas con tu pedido",
+      "items": [
+        { "id": "salsa-pina-habanero", "name": "Pina Habanero", "price": 0 },
+        { "id": "salsa-verde-tatemada", "name": "Verde Tatemada", "price": 0 },
+        { "id": "salsa-chiltepin-arbol", "name": "Chiltepin con Chile de Arbol", "price": 0 },
+        { "id": "salsa-roja-tatemada", "name": "Roja Tatemada", "price": 0 },
+        { "id": "salsa-cilantro", "name": "Cilantro", "price": 0 }
       ]
     }
   ]

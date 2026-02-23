@@ -79,6 +79,8 @@ button {
   background: none;
   font-family: inherit;
   color: inherit;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 input {
@@ -695,7 +697,7 @@ html {
 }
 
 .menu__tab {
-  padding: 0.4rem 0.55rem;
+  padding: 0.5rem 0.65rem;
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 0.5rem;

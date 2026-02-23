@@ -51,7 +51,7 @@
       "name": "Charolas",
       "icon": "🥩",
       "character": "arracherita",
-      "description": "1kg carne en crudo. Incluye: docena de tortillas hechas a mano, limones y salsas.",
+      "note": "1kg carne en crudo. Incluye: docena de tortillas hechas a mano, limones y salsas",
       "items": [
         { "id": "charola-arrachera", "name": "Arrachera", "price": 200 },
         { "id": "charola-chorizos", "name": "Chorizos", "price": 200 },
@@ -69,19 +69,34 @@
           "id": "chavindeca",
           "name": "Chavindeca",
           "price": 60,
-          "promo": { "qty": 2, "price": 100, "label": "2x$100" }
+          "promos": [
+            { "qty": 2, "price": 100, "label": "2x$100" },
+            { "qty": 3, "price": 150, "label": "3x$150" }
+          ],
+          "hasIngredients": true,
+          "nyPrice": 80
         },
         {
           "id": "papa-grill",
           "name": "Papa al Grill",
           "price": 80,
-          "promo": { "qty": 2, "price": 150, "label": "2x$150" }
+          "promos": [
+            { "qty": 2, "price": 150, "label": "2x$150" },
+            { "qty": 3, "price": 200, "label": "3x$200" }
+          ],
+          "hasIngredients": true,
+          "nyPrice": 100
         },
         {
           "id": "torta",
           "name": "Torta",
           "price": 80,
-          "promo": { "qty": 2, "price": 150, "label": "2x$150" }
+          "promos": [
+            { "qty": 2, "price": 150, "label": "2x$150" },
+            { "qty": 3, "price": 200, "label": "3x$200" }
+          ],
+          "hasIngredients": true,
+          "nyPrice": 100
         }
       ],
       "note": "New York no entra en la promo ($100 c/u)"
@@ -91,7 +106,8 @@
       "name": "Bebidas",
       "icon": "🥤",
       "items": [
-        { "id": "agua-del-dia", "name": "Agua del Dia", "price": 25, "variant": { "name": "1 Litro", "price": 40 } },
+        { "id": "agua-del-dia", "name": "Agua del Dia", "price": 25 },
+        { "id": "agua-del-dia-1l", "name": "Agua del Dia 1L", "price": 40 },
         { "id": "coca-cola", "name": "Coca Cola", "price": 25 },
         { "id": "tortillas", "name": "Docena de Tortillas", "price": 20 },
         { "id": "jugo-boing", "name": "Jugo Boing", "price": 25 }

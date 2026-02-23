@@ -7,6 +7,7 @@
   var WHATSAPP_NUMBER = '5214461060320';
   var SWIPE_THRESHOLD = 50;
   var SWIPE_LOCK_MS = 450;
+  var NY_FALLBACK_PRICE = 100;
 
   // ── Zone Config (per-category) ──
   var ZONE_CONFIG = {
@@ -72,6 +73,7 @@
   var menuData = null;
   var cart = {};
   var orderType = null;
+  var pickerBaseItem = null;
   var addressMode = 'write';
   var locationCoords = null;
   var activeWorldIndex = 0;
@@ -101,9 +103,11 @@
   var addressForm = document.getElementById('address-form');
 
   // ── Init ──
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   document.addEventListener('DOMContentLoaded', init);
 
   function init() {
+    window.scrollTo(0, 0);
     loadMenu().then(function () {
       initOrderType();
       initCart();
@@ -224,7 +228,11 @@
   function renderItemCard(item, category) {
     var qty = cart[item.id] ? cart[item.id].qty : 0;
     var promoHTML = '';
-    if (item.promo) {
+    if (item.promos) {
+      promoHTML = item.promos.map(function (p) {
+        return '<span class="menu__item-promo">' + p.label + '</span>';
+      }).join(' ');
+    } else if (item.promo) {
       promoHTML = '<span class="menu__item-promo">' + item.promo.label + '</span>';
     }
     var variantHTML = '';
@@ -254,8 +262,206 @@
     if (!btn) return;
     var id = btn.dataset.id;
     var action = btn.dataset.action;
-    if (action === 'plus') addToCart(id);
-    if (action === 'minus') removeFromCart(id);
+    if (action === 'plus') {
+      var found = findItemById(id);
+      if (found && found.item.hasIngredients) {
+        showIngredientPicker(id);
+        return;
+      }
+      addToCart(id);
+    }
+    if (action === 'minus') {
+      var foundMinus = findItemById(id);
+      if (foundMinus && foundMinus.item.hasIngredients) {
+        removeCompoundFromCart(id);
+        return;
+      }
+      removeFromCart(id);
+    }
+  }
+
+  // ════════════════════════════════════════════
+  //  INGREDIENT PICKER
+  // ════════════════════════════════════════════
+
+  function getIngredients() {
+    var tacos = menuData.categories.find(function (c) { return c.id === 'tacos'; });
+    return tacos.items.map(function (t) {
+      var ingId = t.id.replace('taco-', '');
+      return { id: ingId, name: t.name };
+    });
+  }
+
+  function showIngredientPicker(baseItemId) {
+    pickerBaseItem = baseItemId;
+    var baseItem = findItemById(baseItemId);
+    if (!baseItem) return;
+
+    // Remove existing overlay if any
+    hideIngredientPicker();
+
+    var ingredients = getIngredients();
+    var overlay = document.createElement('div');
+    overlay.className = 'ingredient-picker-overlay';
+    overlay.id = 'ingredient-picker-overlay';
+
+    var panel = document.createElement('div');
+    panel.className = 'ingredient-picker';
+
+    var title = document.createElement('div');
+    title.className = 'ingredient-picker__title';
+    title.textContent = 'Elige tu ingrediente — ' + baseItem.item.name;
+
+    var grid = document.createElement('div');
+    grid.className = 'ingredient-picker__grid';
+
+    var nyPrice = baseItem.item.nyPrice || NY_FALLBACK_PRICE;
+
+    ingredients.forEach(function (ing) {
+      var btn = document.createElement('button');
+      btn.className = 'ingredient-picker__btn';
+      if (ing.id === 'newyork') {
+        btn.className += ' ingredient-picker__btn--ny';
+        btn.textContent = ing.name + ' · $' + nyPrice;
+      } else {
+        btn.textContent = ing.name;
+      }
+      btn.addEventListener('click', function () {
+        addIngredientToCart(baseItemId, ing.id, ing.name);
+        hideIngredientPicker();
+      });
+      grid.appendChild(btn);
+    });
+
+    var cancel = document.createElement('button');
+    cancel.className = 'ingredient-picker__cancel';
+    cancel.textContent = 'Cancelar';
+    cancel.addEventListener('click', hideIngredientPicker);
+
+    panel.appendChild(title);
+    panel.appendChild(grid);
+    panel.appendChild(cancel);
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+
+    // Tap overlay background to close
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) hideIngredientPicker();
+    });
+
+    // Trigger animation
+    requestAnimationFrame(function () {
+      overlay.classList.add('is-visible');
+    });
+  }
+
+  function hideIngredientPicker() {
+    var overlay = document.getElementById('ingredient-picker-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('is-visible');
+    setTimeout(function () {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }, 350);
+    pickerBaseItem = null;
+  }
+
+  function addIngredientToCart(baseItemId, ingredientId, ingredientName) {
+    var compoundId = baseItemId + '--' + ingredientId;
+    var baseItem = findItemById(baseItemId);
+    if (!baseItem) return;
+
+    var isNY = ingredientId === 'newyork';
+    var price = isNY ? (baseItem.item.nyPrice || NY_FALLBACK_PRICE) : baseItem.item.price;
+
+    if (!cart[compoundId]) {
+      cart[compoundId] = {
+        item: { id: compoundId, name: baseItem.item.name, price: price },
+        qty: 0,
+        categoryName: baseItem.categoryName,
+        categoryId: baseItem.categoryId,
+        ingredientName: ingredientName,
+        baseItemId: baseItemId
+      };
+    }
+
+    cart[compoundId].qty++;
+    updateCartUIForPicker(baseItemId);
+    saveCart();
+
+    // Pulse animation on card
+    var card = worldsTrack.querySelector('[data-item-id="' + baseItemId + '"]');
+    if (card) {
+      card.classList.add('has-items');
+      card.classList.remove('is-pulse');
+      void card.offsetWidth;
+      card.classList.add('is-pulse');
+    }
+
+    updateWorldHeight(activeWorldIndex);
+  }
+
+  function getCompoundQty(baseItemId) {
+    var total = 0;
+    var keys = Object.keys(cart);
+    var prefix = baseItemId + '--';
+    for (var i = 0; i < keys.length; i++) {
+      if (keys[i].indexOf(prefix) === 0) {
+        total += cart[keys[i]].qty;
+      }
+    }
+    return total;
+  }
+
+  function updateCartUIForPicker(baseItemId) {
+    var countEl = document.getElementById('count-' + baseItemId);
+    if (countEl) {
+      countEl.textContent = getCompoundQty(baseItemId);
+    }
+
+    var totalItems = 0;
+    var keys = Object.keys(cart);
+    for (var i = 0; i < keys.length; i++) {
+      if (cart[keys[i]].categoryId !== 'salsas') totalItems += cart[keys[i]].qty;
+    }
+    cartBadge.textContent = totalItems;
+    cartFab.hidden = totalItems === 0;
+
+    if (totalItems > 0) {
+      cartFab.classList.remove('is-bounce');
+      void cartFab.offsetWidth;
+      cartFab.classList.add('is-bounce');
+    }
+
+    updateSendButton();
+  }
+
+  function removeCompoundFromCart(baseItemId) {
+    // Find compound entries for this base item, remove qty from the last one found
+    var keys = Object.keys(cart);
+    var prefix = baseItemId + '--';
+    var lastKey = null;
+    for (var i = 0; i < keys.length; i++) {
+      if (keys[i].indexOf(prefix) === 0 && cart[keys[i]].qty > 0) {
+        lastKey = keys[i];
+      }
+    }
+
+    if (!lastKey) return;
+
+    cart[lastKey].qty--;
+    if (cart[lastKey].qty === 0) {
+      delete cart[lastKey];
+    }
+
+    var totalCompound = getCompoundQty(baseItemId);
+    var card = worldsTrack.querySelector('[data-item-id="' + baseItemId + '"]');
+    if (card && totalCompound === 0) {
+      card.classList.remove('has-items');
+    }
+
+    updateCartUIForPicker(baseItemId);
+    saveCart();
+    updateWorldHeight(activeWorldIndex);
   }
 
   // ════════════════════════════════════════════
@@ -407,9 +613,15 @@
     var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (typeof gsap !== 'undefined' && !reducedMotion) {
-      gsap.to(menuWorlds, { height: targetHeight, duration: 0.35, ease: 'power2.out' });
+      gsap.to(menuWorlds, {
+        height: targetHeight, duration: 0.35, ease: 'power2.out',
+        onComplete: function () {
+          if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+        }
+      });
     } else {
       menuWorlds.style.height = targetHeight + 'px';
+      if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
     }
   }
 
@@ -470,6 +682,7 @@
     var tl = gsap.timeline({
       onComplete: function () {
         worldEl.classList.add('is-entered');
+        updateWorldHeight(activeWorldIndex);
       }
     });
 
@@ -580,6 +793,7 @@
 
     cart[id].qty++;
     updateCartUI(id);
+    saveCart();
 
     // Pulse animation on card
     var card = worldsTrack.querySelector('[data-item-id="' + id + '"]');
@@ -605,10 +819,15 @@
       if (card) card.classList.remove('has-items');
     }
     updateCartUI(id);
+    saveCart();
     updateWorldHeight(activeWorldIndex);
   }
 
   function updateCartUI(changedId) {
+    // For picker items, the count is handled by updateCartUIForPicker
+    var foundItem = findItemById(changedId);
+    if (foundItem && foundItem.item.hasIngredients) return;
+
     var countEl = document.getElementById('count-' + changedId);
     if (countEl) {
       countEl.textContent = cart[changedId] ? cart[changedId].qty : 0;
@@ -634,11 +853,76 @@
   function calculateTotal() {
     var total = 0;
     var keys = Object.keys(cart);
+
+    // Group compound entries by baseItemId for promo calculation
+    var compoundGroups = {};
+    var regularKeys = [];
+
     for (var i = 0; i < keys.length; i++) {
       var entry = cart[keys[i]];
-      total += calculateItemSubtotal(entry.item, entry.qty);
+      if (entry.baseItemId) {
+        var baseId = entry.baseItemId;
+        if (!compoundGroups[baseId]) {
+          compoundGroups[baseId] = { promoQty: 0, nyTotal: 0, baseItem: null };
+        }
+        if (entry.ingredientName === 'New York') {
+          compoundGroups[baseId].nyTotal += entry.qty * entry.item.price;
+        } else {
+          compoundGroups[baseId].promoQty += entry.qty;
+          if (!compoundGroups[baseId].baseItem) {
+            compoundGroups[baseId].baseItem = findItemById(baseId);
+          }
+        }
+      } else {
+        regularKeys.push(keys[i]);
+      }
+    }
+
+    // Regular items: per-entry calculation
+    for (var j = 0; j < regularKeys.length; j++) {
+      var regEntry = cart[regularKeys[j]];
+      total += calculateItemSubtotal(regEntry.item, regEntry.qty);
+    }
+
+    // Compound groups: group promo by base item (DP optimal multi-tier)
+    var groupIds = Object.keys(compoundGroups);
+    for (var k = 0; k < groupIds.length; k++) {
+      var group = compoundGroups[groupIds[k]];
+      total += group.nyTotal;
+      if (group.promoQty > 0 && group.baseItem) {
+        total += calculatePromoTotal(group.promoQty, group.baseItem.item);
+      }
+    }
+
+    return total;
+  }
+
+  function calculateFullPrice() {
+    var total = 0;
+    var keys = Object.keys(cart);
+    for (var i = 0; i < keys.length; i++) {
+      var entry = cart[keys[i]];
+      total += entry.qty * entry.item.price;
     }
     return total;
+  }
+
+  function calculatePromoTotal(qty, item) {
+    var promos = item.promos || (item.promo ? [item.promo] : []);
+    if (promos.length === 0) return qty * item.price;
+
+    // DP: find cheapest price for qty items given multiple promo tiers
+    var dp = [0];
+    for (var i = 1; i <= qty; i++) {
+      dp[i] = dp[i - 1] + item.price;
+      for (var p = 0; p < promos.length; p++) {
+        if (i >= promos[p].qty) {
+          var cost = dp[i - promos[p].qty] + promos[p].price;
+          if (cost < dp[i]) dp[i] = cost;
+        }
+      }
+    }
+    return dp[qty];
   }
 
   function calculateItemSubtotal(item, qty) {
@@ -652,6 +936,59 @@
 
   function initCart() {
     cartFab.addEventListener('click', openSheet);
+    restoreCart();
+  }
+
+  // ── Cart persistence (sessionStorage) ──
+
+  function saveCart() {
+    try {
+      sessionStorage.setItem('ac14_cart', JSON.stringify(cart));
+    } catch (e) {}
+  }
+
+  function restoreCart() {
+    try {
+      var saved = sessionStorage.getItem('ac14_cart');
+      if (!saved) return;
+      var parsed = JSON.parse(saved);
+      if (!parsed || typeof parsed !== 'object') return;
+
+      // Restore each entry, re-validating against menuData
+      var keys = Object.keys(parsed);
+      for (var i = 0; i < keys.length; i++) {
+        var entry = parsed[keys[i]];
+        if (!entry || !entry.item || !entry.qty) continue;
+        cart[keys[i]] = entry;
+      }
+
+      // Update all UI: stepper counts, FAB badge, has-items classes
+      var totalItems = 0;
+      var cartKeys = Object.keys(cart);
+      for (var j = 0; j < cartKeys.length; j++) {
+        var ce = cart[cartKeys[j]];
+        if (ce.categoryId !== 'salsas') totalItems += ce.qty;
+
+        // Update stepper count on card
+        if (ce.baseItemId) {
+          // Compound entry — update base item card
+          var countEl = document.getElementById('count-' + ce.baseItemId);
+          if (countEl) countEl.textContent = getCompoundQty(ce.baseItemId);
+          var card = worldsTrack.querySelector('[data-item-id="' + ce.baseItemId + '"]');
+          if (card) card.classList.add('has-items');
+        } else {
+          var countEl2 = document.getElementById('count-' + ce.item.id);
+          if (countEl2) countEl2.textContent = ce.qty;
+          var card2 = worldsTrack.querySelector('[data-item-id="' + ce.item.id + '"]');
+          if (card2) card2.classList.add('has-items');
+        }
+      }
+
+      cartBadge.textContent = totalItems;
+      cartFab.hidden = totalItems === 0;
+    } catch (e) {
+      cart = {};
+    }
   }
 
   // ════════════════════════════════════════════
@@ -824,22 +1161,63 @@
       return;
     }
 
-    sheetItems.innerHTML = entries.map(function (entry) {
-      var subtotal = calculateItemSubtotal(entry.item, entry.qty);
-      var detail = entry.categoryName;
-      if (entry.item.promo && entry.qty >= entry.item.promo.qty) {
-        var promoSets = Math.floor(entry.qty / entry.item.promo.qty);
-        detail += ' (' + promoSets + 'x promo)';
+    // Build promo info for compound groups
+    var compoundPromoInfo = {};
+    for (var ci = 0; ci < entries.length; ci++) {
+      var ce = entries[ci];
+      if (ce.baseItemId) {
+        if (!compoundPromoInfo[ce.baseItemId]) {
+          compoundPromoInfo[ce.baseItemId] = { promoQty: 0 };
+        }
+        if (ce.ingredientName !== 'New York') {
+          compoundPromoInfo[ce.baseItemId].promoQty += ce.qty;
+        }
       }
+    }
+
+    sheetItems.innerHTML = entries.map(function (entry) {
+      var displayName = entry.item.name;
+      var detail = entry.categoryName;
+      var subtotal;
+      var sheetId = entry.item.id;
+      var isCompound = !!entry.baseItemId;
+
+      if (isCompound) {
+        displayName = entry.item.name + ' — ' + entry.ingredientName;
+        subtotal = entry.qty * entry.item.price;
+
+        // Show grouped promo note for non-NY items
+        if (entry.ingredientName !== 'New York') {
+          var groupInfo = compoundPromoInfo[entry.baseItemId];
+          var baseRef = findItemById(entry.baseItemId);
+          if (baseRef && groupInfo) {
+            var promos = baseRef.item.promos || (baseRef.item.promo ? [baseRef.item.promo] : []);
+            var activePromo = null;
+            for (var pi = promos.length - 1; pi >= 0; pi--) {
+              if (groupInfo.promoQty >= promos[pi].qty) { activePromo = promos[pi]; break; }
+            }
+            if (activePromo) {
+              detail += ' (promo aplicada)';
+            }
+          }
+        }
+      } else {
+        subtotal = calculateItemSubtotal(entry.item, entry.qty);
+        if (entry.item.promo && entry.qty >= entry.item.promo.qty) {
+          var promoSets = Math.floor(entry.qty / entry.item.promo.qty);
+          detail += ' (' + promoSets + 'x promo)';
+        }
+      }
+
       return '<div class="sheet-item">' +
         '<div class="sheet-item__info">' +
-          '<div class="sheet-item__name">' + entry.item.name + '</div>' +
+          '<div class="sheet-item__name">' + displayName + '</div>' +
           '<div class="sheet-item__detail">' + detail + '</div>' +
         '</div>' +
         '<div class="sheet-item__stepper">' +
-          '<button class="stepper__btn stepper__btn--minus" data-sheet-action="minus" data-id="' + entry.item.id + '" aria-label="Quitar uno">−</button>' +
+          '<button class="stepper__btn stepper__btn--minus" data-sheet-action="minus" data-id="' + sheetId + '"' + (isCompound ? ' data-compound="true" data-base-id="' + entry.baseItemId + '"' : '') + ' aria-label="Quitar uno">−</button>' +
           '<span class="stepper__count">' + entry.qty + '</span>' +
-          '<button class="stepper__btn stepper__btn--plus" data-sheet-action="plus" data-id="' + entry.item.id + '" aria-label="Agregar uno">+</button>' +
+          '<button class="stepper__btn stepper__btn--plus" data-sheet-action="plus" data-id="' + sheetId + '"' + (isCompound ? ' data-compound="true" data-base-id="' + entry.baseItemId + '"' : '') + ' aria-label="Agregar uno">+</button>' +
         '</div>' +
         '<span class="sheet-item__subtotal">' + (subtotal > 0 ? '$' + subtotal : 'Incluida') + '</span>' +
       '</div>';
@@ -849,13 +1227,51 @@
       btn.addEventListener('click', function () {
         var id = btn.dataset.id;
         var action = btn.dataset.sheetAction;
-        if (action === 'plus') addToCart(id);
-        if (action === 'minus') removeFromCart(id);
+        var isCompound = btn.dataset.compound === 'true';
+
+        if (isCompound) {
+          if (action === 'plus') {
+            if (cart[id]) {
+              cart[id].qty++;
+              updateCartUIForPicker(btn.dataset.baseId);
+              saveCart();
+            }
+          }
+          if (action === 'minus') {
+            if (cart[id] && cart[id].qty > 0) {
+              cart[id].qty--;
+              if (cart[id].qty === 0) delete cart[id];
+              updateCartUIForPicker(btn.dataset.baseId);
+              saveCart();
+              var totalCompound = getCompoundQty(btn.dataset.baseId);
+              var card = worldsTrack.querySelector('[data-item-id="' + btn.dataset.baseId + '"]');
+              if (card && totalCompound === 0) card.classList.remove('has-items');
+            }
+          }
+        } else {
+          if (action === 'plus') addToCart(id);
+          if (action === 'minus') removeFromCart(id);
+        }
         renderSheet();
       });
     });
 
-    sheetTotalValue.textContent = '$' + calculateTotal();
+    var total = calculateTotal();
+    var fullPrice = calculateFullPrice();
+    var savings = fullPrice - total;
+
+    sheetTotalValue.textContent = '$' + total;
+
+    var savingsEl = document.getElementById('sheet-savings');
+    var savingsValue = document.getElementById('sheet-savings-value');
+    if (savingsEl && savingsValue) {
+      if (savings > 0) {
+        savingsValue.textContent = '-$' + savings;
+        savingsEl.hidden = false;
+      } else {
+        savingsEl.hidden = true;
+      }
+    }
   }
 
   function updateSendButton() {
@@ -898,13 +1314,46 @@
     var keys = Object.keys(cart);
     for (var i = 0; i < keys.length; i++) {
       var entry = cart[keys[i]];
-      var subtotal = calculateItemSubtotal(entry.item, entry.qty);
-      var line = '- ' + entry.qty + 'x ' + entry.categoryName + ' ' + entry.item.name + (subtotal > 0 ? ' ($' + subtotal + ')' : ' (incluida)');
-      if (entry.item.promo && entry.qty >= entry.item.promo.qty) {
+      var isCompound = !!entry.baseItemId;
+      var subtotal;
+      var itemLabel;
+
+      if (isCompound) {
+        subtotal = entry.qty * entry.item.price;
+        itemLabel = entry.item.name + ' (' + entry.ingredientName + ')';
+      } else {
+        subtotal = calculateItemSubtotal(entry.item, entry.qty);
+        itemLabel = entry.item.name;
+      }
+
+      var line = '- ' + entry.qty + 'x ' + entry.categoryName + ' ' + itemLabel + (subtotal > 0 ? ' ($' + subtotal + ')' : ' (incluida)');
+
+      if (!isCompound && entry.item.promo && entry.qty >= entry.item.promo.qty) {
         var promoSets = Math.floor(entry.qty / entry.item.promo.qty);
         line += ' [' + promoSets + 'x promo ' + entry.item.promo.label + ']';
       }
       msg += line + '\n';
+    }
+
+    // Add grouped promo note for compound items
+    var compoundBases = {};
+    for (var ci = 0; ci < keys.length; ci++) {
+      var ce = cart[keys[ci]];
+      if (ce.baseItemId && ce.ingredientName !== 'New York') {
+        if (!compoundBases[ce.baseItemId]) compoundBases[ce.baseItemId] = 0;
+        compoundBases[ce.baseItemId] += ce.qty;
+      }
+    }
+    var baseIds = Object.keys(compoundBases);
+    for (var bi = 0; bi < baseIds.length; bi++) {
+      var baseRef = findItemById(baseIds[bi]);
+      if (!baseRef) continue;
+      var qty = compoundBases[baseIds[bi]];
+      var fullPrice = qty * baseRef.item.price;
+      var promoPrice = calculatePromoTotal(qty, baseRef.item);
+      if (promoPrice < fullPrice) {
+        msg += '  [' + baseRef.item.name + ': promo aplicada — $' + promoPrice + ']\n';
+      }
     }
 
     msg += '\n*Total: $' + calculateTotal() + '*\n';

@@ -87,6 +87,7 @@
       </button>
     </div>
     <div class="order-type__address" id="address-form" hidden>
+      <p class="order-type__delivery-note">* Puede aplicar un costo adicional de envio segun la distancia</p>
       <p class="address-toggle__hint">Como quieres darnos tu direccion?</p>
       <div class="address-toggle" id="address-toggle">
         <button class="address-toggle__btn is-active" data-mode="write">
@@ -185,6 +186,10 @@
       <div class="bottom-sheet__empty" id="sheet-empty" hidden>
         <img src="assets/generated/cart-empty.webp" alt="Personajes tristes" class="bottom-sheet__empty-img" loading="lazy">
         <p>Tu carrito esta vacio</p>
+      </div>
+      <div class="bottom-sheet__savings" id="sheet-savings" hidden>
+        <span>Ahorras</span>
+        <span id="sheet-savings-value">$0</span>
       </div>
       <div class="bottom-sheet__total" id="sheet-total">
         <span>Total</span>

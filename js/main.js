@@ -696,24 +696,24 @@
     if (character) {
       tl.fromTo(character,
         { opacity: 0, scale: 0.5 },
-        { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.7)' }
+        { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(1.7)' }
       );
     }
 
     // Title fade up
     if (title) {
       tl.fromTo(title,
-        { opacity: 0, y: 15 },
-        { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' },
-        character ? '-=0.3' : '0'
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.3, ease: 'power3.out' },
+        character ? '-=0.25' : '0'
       );
     }
 
     // Quote fade
     if (quote) {
       tl.fromTo(quote,
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' },
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' },
         '-=0.2'
       );
     }
@@ -721,29 +721,29 @@
     // Description fade
     if (desc) {
       tl.fromTo(desc,
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' },
-        '-=0.2'
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' },
+        '-=0.15'
       );
     }
 
     // Salsas subtitle
     if (salsasSub) {
       tl.fromTo(salsasSub,
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' },
-        '-=0.2'
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' },
+        '-=0.15'
       );
     }
 
     // Items stagger in
     if (items.length > 0) {
       tl.fromTo(items,
-        { opacity: 0, y: 25, scale: 0.95 },
+        { opacity: 0, y: 15, scale: 0.97 },
         {
           opacity: 1, y: 0, scale: 1,
-          duration: 0.4,
-          stagger: 0.06,
+          duration: 0.3,
+          stagger: 0.03,
           ease: 'power3.out'
         },
         '-=0.2'
@@ -753,8 +753,8 @@
     // Salsas image
     if (salsasWrap) {
       tl.fromTo(salsasWrap,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' },
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.3, ease: 'power3.out' },
         '-=0.2'
       );
     }

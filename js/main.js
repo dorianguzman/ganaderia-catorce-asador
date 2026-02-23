@@ -88,6 +88,7 @@
   // ── DOM refs ──
   var menuNav = document.getElementById('menu-nav');
   var menuDots = document.getElementById('menu-dots');
+  var swipeHint = document.getElementById('swipe-hint');
   var menuWorlds = document.getElementById('menu-worlds');
   var worldsTrack = document.getElementById('menu-worlds-track');
   var cartFab = document.getElementById('cart-fab');
@@ -571,6 +572,11 @@
 
     // Manage video play/pause
     manageWorldVideos(index);
+
+    // Hide swipe hint after first navigation
+    if (swipeHint && !swipeHint.classList.contains('is-hidden')) {
+      swipeHint.classList.add('is-hidden');
+    }
 
     // Lock swipe briefly
     swipeLocked = true;

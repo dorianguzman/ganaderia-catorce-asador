@@ -74,7 +74,7 @@
   var cart = {};
   var orderType = null;
   var pickerBaseItem = null;
-  var addressMode = 'write';
+  var addressMode = 'location';
   var locationCoords = null;
   var activeWorldIndex = 0;
   var worldCount = 0;
@@ -1019,6 +1019,14 @@
     });
     cardsContainer.classList.add('has-selection');
     addressForm.hidden = type !== 'takeaway';
+
+    // Reveal menu section
+    var menuEl = document.getElementById('menu');
+    if (menuEl && !menuEl.classList.contains('is-visible')) {
+      menuEl.classList.add('is-visible');
+      ScrollTrigger.refresh();
+    }
+    updateSendButton();
   }
 
   function initAddressToggle() {
@@ -1108,6 +1116,8 @@
     bottomSheet.querySelector('.bottom-sheet__handle').addEventListener('click', closeSheet);
     btnSend.addEventListener('click', sendWhatsApp);
     document.getElementById('customer-name').addEventListener('input', updateSendButton);
+    document.getElementById('address-street').addEventListener('input', updateSendButton);
+    document.getElementById('address-colonia').addEventListener('input', updateSendButton);
   }
 
   function openSheet() {
@@ -1284,7 +1294,13 @@
     var hasItems = Object.keys(cart).length > 0;
     var hasName = document.getElementById('customer-name').value.trim().length > 0;
     var hasOrderType = orderType !== null;
-    btnSend.disabled = !(hasItems && hasName && hasOrderType);
+    var addressOk = true;
+    if (orderType === 'takeaway' && addressMode === 'write') {
+      var street = document.getElementById('address-street').value.trim();
+      var colonia = document.getElementById('address-colonia').value.trim();
+      addressOk = street.length > 0 && colonia.length > 0;
+    }
+    btnSend.disabled = !(hasItems && hasName && hasOrderType && addressOk);
   }
 
   // ════════════════════════════════════════════

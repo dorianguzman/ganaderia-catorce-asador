@@ -78,7 +78,7 @@
       </div>
       <p class="hero__scroll-text">Desliza para descubrir lo que preparamos para ti</p>
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+        <path d="M7 11l5-5 5 5M7 18l5-5 5 5"/>
       </svg>
     </div>
   </section>
@@ -100,30 +100,30 @@
       <p class="order-type__delivery-note">* Puede aplicar un costo adicional de envio segun la distancia</p>
       <p class="address-toggle__hint">Como quieres darnos tu direccion?</p>
       <div class="address-toggle" id="address-toggle">
-        <button class="address-toggle__btn is-active" data-mode="write">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          Escribir direccion
-        </button>
-        <button class="address-toggle__btn" data-mode="location">
+        <button class="address-toggle__btn is-active" data-mode="location">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           Compartir ubicacion
         </button>
+        <button class="address-toggle__btn" data-mode="write">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Escribir direccion
+        </button>
       </div>
-      <div id="address-fields">
+      <div id="address-fields" hidden>
         <div class="address-field">
-          <label for="address-street">Calle y numero</label>
-          <input type="text" id="address-street" placeholder="Ej: Av. Reforma #123">
+          <label for="address-street">Calle y numero <span class="required">*</span></label>
+          <input type="text" id="address-street" placeholder="Ej: Av. Reforma #123" required>
         </div>
         <div class="address-field">
-          <label for="address-colonia">Colonia</label>
-          <input type="text" id="address-colonia" placeholder="Ej: Col. Centro">
+          <label for="address-colonia">Colonia <span class="required">*</span></label>
+          <input type="text" id="address-colonia" placeholder="Ej: Col. Centro" required>
         </div>
         <div class="address-field">
-          <label for="address-ref">Referencia</label>
+          <label for="address-ref">Referencia <span class="optional">(opcional)</span></label>
           <input type="text" id="address-ref" placeholder="Ej: Casa azul, junto a la tienda">
         </div>
       </div>
-      <div id="location-share" class="location-share" hidden>
+      <div id="location-share" class="location-share">
         <button class="location-share__btn" id="btn-get-location">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>

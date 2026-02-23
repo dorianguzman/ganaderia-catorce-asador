@@ -498,6 +498,16 @@ html {
 }
 
 
+.address-field .required {
+  color: var(--promo);
+  font-weight: 600;
+}
+.address-field .optional {
+  color: var(--white-dim);
+  font-weight: 400;
+  font-size: 0.72rem;
+}
+
 .address-field input {
   width: 100%;
   padding: 0.75rem 1rem;
@@ -668,6 +678,15 @@ html {
 /* ===== MENU ===== */
 .menu {
   padding: 0 0 1rem;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.6s var(--ease-out), opacity 0.4s ease;
+}
+.menu.is-visible {
+  max-height: none;
+  overflow: visible;
+  opacity: 1;
 }
 
 /* Pill tab nav */

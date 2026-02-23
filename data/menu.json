@@ -1,0 +1,109 @@
+{
+  "restaurant": {
+    "name": "Asador Callejero Catorce",
+    "tagline": "Del Asador, A Tu Corazon",
+    "address": "Av. Ciervo 40, La Pradera, 76269 Santiago de Queretaro, Qro.",
+    "hours": {
+      "saturday": "1PM - 9PM",
+      "sunday": "12PM - 8PM"
+    },
+    "whatsapp": "5214461060320",
+    "website": "https://ganaderiacatorce.com"
+  },
+  "categories": [
+    {
+      "id": "tacos",
+      "name": "Tacos",
+      "icon": "🌮",
+      "character": "arracherita",
+      "items": [
+        { "id": "taco-aguja", "name": "Aguja", "price": 25 },
+        { "id": "taco-arrachera", "name": "Arrachera", "price": 25 },
+        { "id": "taco-chistorra", "name": "Chistorra", "price": 25 },
+        { "id": "taco-chorizo-argentino", "name": "Chorizo Argentino", "price": 25 },
+        { "id": "taco-chorizo-espanol", "name": "Chorizo Español", "price": 25 },
+        { "id": "taco-chorizo-verde", "name": "Chorizo Verde", "price": 25 },
+        { "id": "taco-combinado", "name": "Combinado", "price": 25 },
+        { "id": "taco-diezmillo", "name": "Diezmillo", "price": 30 },
+        { "id": "taco-newyork", "name": "New York", "price": 40 }
+      ]
+    },
+    {
+      "id": "quesadillas",
+      "name": "Quesadillas",
+      "icon": "🧀",
+      "character": "chavindeca",
+      "items": [
+        { "id": "quesa-aguja", "name": "Aguja", "price": 40 },
+        { "id": "quesa-arrachera", "name": "Arrachera", "price": 40 },
+        { "id": "quesa-chistorra", "name": "Chistorra", "price": 40 },
+        { "id": "quesa-chorizo-argentino", "name": "Chorizo Argentino", "price": 40 },
+        { "id": "quesa-chorizo-espanol", "name": "Chorizo Español", "price": 40 },
+        { "id": "quesa-chorizo-verde", "name": "Chorizo Verde", "price": 40 },
+        { "id": "quesa-combinado", "name": "Combinado", "price": 40 },
+        { "id": "quesa-diezmillo", "name": "Diezmillo", "price": 45 },
+        { "id": "quesa-newyork", "name": "New York", "price": 55 },
+        { "id": "quesa-sencilla", "name": "Sencilla", "price": 25 }
+      ]
+    },
+    {
+      "id": "charolas",
+      "name": "Charolas",
+      "icon": "🥩",
+      "character": "arracherita",
+      "description": "1kg carne en crudo. Incluye: docena de tortillas hechas a mano, limones y salsas.",
+      "items": [
+        { "id": "charola-arrachera", "name": "Arrachera", "price": 200 },
+        { "id": "charola-chorizos", "name": "Chorizos", "price": 200 },
+        { "id": "charola-combinada", "name": "Combinada", "price": 250 },
+        { "id": "charola-diezmillo", "name": "Diezmillo", "price": 300 }
+      ]
+    },
+    {
+      "id": "especialidades",
+      "name": "Especialidades",
+      "icon": "⭐",
+      "character": "papita",
+      "items": [
+        {
+          "id": "chavindeca",
+          "name": "Chavindeca",
+          "price": 60,
+          "promo": { "qty": 2, "price": 100, "label": "2x$100" }
+        },
+        {
+          "id": "papa-grill",
+          "name": "Papa al Grill",
+          "price": 80,
+          "promo": { "qty": 2, "price": 150, "label": "2x$150" }
+        },
+        {
+          "id": "torta",
+          "name": "Torta",
+          "price": 80,
+          "promo": { "qty": 2, "price": 150, "label": "2x$150" }
+        }
+      ],
+      "note": "New York no entra en la promo ($100 c/u)"
+    },
+    {
+      "id": "bebidas",
+      "name": "Bebidas",
+      "icon": "🥤",
+      "items": [
+        { "id": "agua-del-dia", "name": "Agua del Dia", "price": 25, "variant": { "name": "1 Litro", "price": 40 } },
+        { "id": "coca-cola", "name": "Coca Cola", "price": 25 },
+        { "id": "tortillas", "name": "Docena de Tortillas", "price": 20 },
+        { "id": "jugo-boing", "name": "Jugo Boing", "price": 25 }
+      ]
+    },
+    {
+      "id": "postres",
+      "name": "Postres",
+      "icon": "🍰",
+      "items": [
+        { "id": "pastel-3-leches", "name": "Pastel de 3 Leches", "price": 45 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Asador Callejero Catorce — Comida Urbana</title>
+  <meta name="description" content="Menu digital del Asador Callejero Catorce. Tacos, quesadillas, charolas y especialidades al carbon. Del Asador, A Tu Corazon.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Asador Callejero Catorce — Comida Urbana">
+  <meta property="og:description" content="Menu digital. Tacos, quesadillas, charolas y especialidades al carbon. Haz tu pedido por WhatsApp.">
+  <meta property="og:image" content="assets/ac-logo-transparent.png">
+  <meta property="og:url" content="https://asador.ganaderiacatorce.com">
+  <meta property="og:type" content="website">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon-180.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.min.css">
+</head>
+<body>
+
+  <!-- ===== QR DOWNLOAD BUTTON ===== -->
+  <button class="qr-download-btn" id="qr-download-btn" aria-label="Descargar QR del menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+      <rect x="14" y="14" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/>
+    </svg>
+  </button>
+
+  <!-- QR Modal -->
+  <div class="qr-modal-overlay" id="qr-modal-overlay">
+    <div class="qr-modal">
+      <div class="qr-modal__code" id="qr-modal-code"></div>
+      <p class="qr-modal__label">Escanea o descarga para compartir</p>
+      <div class="qr-modal__actions">
+        <button class="qr-modal__btn qr-modal__btn--download" id="qr-modal-download">Descargar</button>
+        <button class="qr-modal__btn qr-modal__btn--close" id="qr-modal-close">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HERO ===== -->
+  <section id="hero" class="hero">
+    <p class="hero__tagline hero__tagline--top">Del Asador, A Tu Corazon</p>
+    <div class="hero__bg">
+      <video src="assets/generated/hero-bg.mp4" poster="assets/generated/hero-bg.webp" autoplay loop muted playsinline class="hero__bg-img"></video>
+      <div class="hero__overlay"></div>
+    </div>
+    <div class="hero__content">
+      <img src="assets/ac-logo-transparent.png" alt="AC14 Logo" class="hero__logo" loading="eager">
+      <p class="hero__subtitle">Asador Callejero</p>
+      <h1 class="hero__title" id="hero-title">CATORCE</h1>
+      <p class="hero__tagline">Comida Urbana</p>
+    </div>
+    <div class="hero__bottom-info">
+      <div class="hero__hours">
+        <span>SAB 1-9PM</span>
+        <span class="hero__hours-dot"></span>
+        <span>DOM 12-8PM</span>
+      </div>
+      <p class="hero__scroll-text">Desliza para descubrir lo que preparamos para ti</p>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ===== ORDER TYPE ===== -->
+  <section id="order-type" class="order-type">
+    <h2 class="section-title">Tu Pedido</h2>
+    <div class="order-type__cards" id="order-type-cards">
+      <button class="order-card order-card--dinein" data-type="dine-in" aria-pressed="false">
+        <img src="assets/generated/order-dinein.webp" alt="Arracherita" class="order-card__img" loading="lazy">
+        <span class="order-card__label">Para Comer Aqui</span>
+      </button>
+      <button class="order-card order-card--takeaway" data-type="takeaway" aria-pressed="false">
+        <img src="assets/generated/order-takeaway.webp" alt="Papita" class="order-card__img" loading="lazy">
+        <span class="order-card__label">Para Llevar</span>
+      </button>
+    </div>
+    <div class="order-type__address" id="address-form" hidden>
+      <p class="address-toggle__hint">Como quieres darnos tu direccion?</p>
+      <div class="address-toggle" id="address-toggle">
+        <button class="address-toggle__btn is-active" data-mode="write">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Escribir direccion
+        </button>
+        <button class="address-toggle__btn" data-mode="location">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Compartir ubicacion
+        </button>
+      </div>
+      <div id="address-fields">
+        <div class="address-field">
+          <label for="address-street">Calle y numero</label>
+          <input type="text" id="address-street" placeholder="Ej: Av. Reforma #123">
+        </div>
+        <div class="address-field">
+          <label for="address-colonia">Colonia</label>
+          <input type="text" id="address-colonia" placeholder="Ej: Col. Centro">
+        </div>
+        <div class="address-field">
+          <label for="address-ref">Referencia</label>
+          <input type="text" id="address-ref" placeholder="Ej: Casa azul, junto a la tienda">
+        </div>
+      </div>
+      <div id="location-share" class="location-share" hidden>
+        <button class="location-share__btn" id="btn-get-location">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          Obtener ubicacion
+        </button>
+        <div class="location-share__status" id="location-status" hidden>
+          <span class="location-share__check">&#10003;</span>
+          <span>Ubicacion obtenida</span>
+          <a class="location-share__link" id="location-link" href="#" target="_blank" rel="noopener">Ver en mapa</a>
+        </div>
+        <div class="location-share__error" id="location-error" hidden></div>
+        <div class="address-field">
+          <label for="location-ref">Referencia (opcional)</label>
+          <input type="text" id="location-ref" placeholder="Ej: Casa azul, junto a la tienda">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MENU ===== -->
+  <section id="menu" class="menu">
+    <nav class="menu__nav" id="menu-nav" aria-label="Categorias del menu"></nav>
+    <div class="menu__dots" id="menu-dots"></div>
+    <div class="menu__worlds" id="menu-worlds">
+      <div class="menu__worlds-track" id="menu-worlds-track"></div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer id="footer" class="footer">
+    <img src="assets/ac-logo-transparent.png" alt="Asador Callejero Catorce" class="footer__logo" loading="lazy">
+    <div class="footer__info">
+      <p class="footer__address">Av. Ciervo 40, La Pradera, 76269 Santiago de Queretaro, Qro.</p>
+      <p class="footer__hours">Sabado 1PM-9PM &middot; Domingo 12PM-8PM</p>
+      <a href="tel:+524461060320" class="footer__phone">446 106 0320</a>
+    </div>
+    <div class="footer__powered">
+      <span class="footer__powered-label">Un producto de</span>
+      <a href="https://ganaderiacatorce.com" target="_blank" rel="noopener" class="footer__powered-logo">
+        <span class="footer__powered-name">Ganaderia</span>
+        <img src="assets/cow-pig.png" alt="Ganaderia Catorce" class="footer__powered-icon">
+        <span class="footer__powered-catorce">CATORCE</span>
+      </a>
+    </div>
+    <p class="footer__tagline">Del Asador, A Tu Corazon</p>
+  </footer>
+
+  <!-- ===== CART FAB ===== -->
+  <button class="cart-fab" id="cart-fab" aria-label="Ver carrito" hidden>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+    </svg>
+    <span class="cart-fab__badge" id="cart-badge">0</span>
+  </button>
+
+  <!-- ===== BOTTOM SHEET ===== -->
+  <div class="bottom-sheet__overlay" id="sheet-overlay" hidden></div>
+  <div class="bottom-sheet" id="bottom-sheet" aria-hidden="true">
+    <div class="bottom-sheet__handle"></div>
+    <div class="bottom-sheet__content">
+      <h3 class="bottom-sheet__title">Tu Pedido</h3>
+      <div class="bottom-sheet__order-type" id="sheet-order-type"></div>
+      <div class="bottom-sheet__address" id="sheet-address"></div>
+      <div class="bottom-sheet__items" id="sheet-items">
+        <!-- Cart items rendered by JS -->
+      </div>
+      <div class="bottom-sheet__empty" id="sheet-empty" hidden>
+        <img src="assets/generated/cart-empty.webp" alt="Personajes tristes" class="bottom-sheet__empty-img" loading="lazy">
+        <p>Tu carrito esta vacio</p>
+      </div>
+      <div class="bottom-sheet__total" id="sheet-total">
+        <span>Total</span>
+        <span id="sheet-total-value">$0</span>
+      </div>
+      <div class="bottom-sheet__name">
+        <label for="customer-name">Tu nombre</label>
+        <input type="text" id="customer-name" placeholder="Nombre para el pedido">
+      </div>
+      <div class="bottom-sheet__celebration" id="sheet-celebration" hidden>
+        <img src="assets/generated/cart-celebration.webp" alt="Celebracion!" class="bottom-sheet__celebration-img" loading="lazy">
+        <p>Pedido enviado!</p>
+      </div>
+      <button class="btn-whatsapp" id="btn-send" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        Enviar Pedido por WhatsApp
+      </button>
+    </div>
+  </div>
+
+  <!-- QRCode.js -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- App -->
+  <script src="js/main.min.js"></script>
+</body>
+</html>

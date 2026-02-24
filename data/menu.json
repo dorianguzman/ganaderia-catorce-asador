@@ -23,7 +23,7 @@
         { "id": "taco-chorizo-argentino", "name": "Chorizo Argentino", "price": 25 },
         { "id": "taco-chorizo-espanol", "name": "Chorizo Español", "price": 25 },
         { "id": "taco-chorizo-verde", "name": "Chorizo Verde", "price": 25 },
-        { "id": "taco-combinado", "name": "Combinado", "price": 25 },
+        { "id": "taco-combinado", "name": "Combinado", "price": 25, "hasIngredients": true, "minIngredients": 2, "maxIngredients": 2 },
         { "id": "taco-diezmillo", "name": "Diezmillo", "price": 30 },
         { "id": "taco-newyork", "name": "New York", "price": 40 }
       ]
@@ -40,7 +40,7 @@
         { "id": "quesa-chorizo-argentino", "name": "Chorizo Argentino", "price": 40 },
         { "id": "quesa-chorizo-espanol", "name": "Chorizo Español", "price": 40 },
         { "id": "quesa-chorizo-verde", "name": "Chorizo Verde", "price": 40 },
-        { "id": "quesa-combinado", "name": "Combinado", "price": 40 },
+        { "id": "quesa-combinado", "name": "Combinado", "price": 40, "hasIngredients": true, "minIngredients": 2, "maxIngredients": 2 },
         { "id": "quesa-diezmillo", "name": "Diezmillo", "price": 45 },
         { "id": "quesa-newyork", "name": "New York", "price": 55 },
         { "id": "quesa-sencilla", "name": "Sencilla", "price": 25 }
@@ -54,8 +54,18 @@
       "note": "1kg carne en crudo. Incluye: docena de tortillas hechas a mano, limones y salsas",
       "items": [
         { "id": "charola-arrachera", "name": "Arrachera", "price": 200 },
-        { "id": "charola-chorizos", "name": "Chorizos", "price": 200 },
-        { "id": "charola-combinada", "name": "Combinada", "price": 250 },
+        {
+          "id": "charola-chorizos",
+          "name": "Chorizos",
+          "price": 200,
+          "hasIngredients": true,
+          "ingredients": [
+            { "id": "chorizo-argentino", "name": "Chorizo Argentino" },
+            { "id": "chorizo-espanol", "name": "Chorizo Español" },
+            { "id": "chorizo-verde", "name": "Chorizo Verde" }
+          ]
+        },
+        { "id": "charola-combinada", "name": "Combinada", "price": 250, "hasIngredients": true, "minIngredients": 2, "maxIngredients": 4 },
         { "id": "charola-diezmillo", "name": "Diezmillo", "price": 300 }
       ]
     },

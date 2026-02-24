@@ -231,10 +231,10 @@
     var promoHTML = '';
     if (item.promos) {
       promoHTML = item.promos.map(function (p) {
-        return '<span class="menu__item-promo">' + p.label + '</span>';
-      }).join(' ');
+        return '<div class="menu__item-promo"><span class="menu__item-promo-label">Promo</span><span class="menu__item-promo-value">' + p.label + '</span></div>';
+      }).join('');
     } else if (item.promo) {
-      promoHTML = '<span class="menu__item-promo">' + item.promo.label + '</span>';
+      promoHTML = '<div class="menu__item-promo"><span class="menu__item-promo-label">Promo</span><span class="menu__item-promo-value">' + item.promo.label + '</span></div>';
     }
     var variantHTML = '';
     if (item.variant) {
@@ -301,7 +301,9 @@
     // Remove existing overlay if any
     hideIngredientPicker();
 
-    var ingredients = getIngredients();
+    var ingredients = baseItem.item.ingredients || getIngredients();
+    var isMulti = baseItem.item.minIngredients && baseItem.item.maxIngredients;
+
     var overlay = document.createElement('div');
     overlay.className = 'ingredient-picker-overlay';
     overlay.id = 'ingredient-picker-overlay';
@@ -309,38 +311,111 @@
     var panel = document.createElement('div');
     panel.className = 'ingredient-picker';
 
+    var minIng = baseItem.item.minIngredients || 0;
+    var maxIng = baseItem.item.maxIngredients || 0;
+
     var title = document.createElement('div');
     title.className = 'ingredient-picker__title';
-    title.textContent = 'Elige tu ingrediente — ' + baseItem.item.name;
+    title.textContent = isMulti
+      ? 'Elige ' + (minIng === maxIng ? minIng : minIng + ' a ' + maxIng) + ' ingredientes — ' + baseItem.item.name
+      : 'Elige tu ingrediente — ' + baseItem.item.name;
 
     var grid = document.createElement('div');
     grid.className = 'ingredient-picker__grid';
 
     var nyPrice = baseItem.item.nyPrice || NY_FALLBACK_PRICE;
 
-    ingredients.forEach(function (ing) {
-      var btn = document.createElement('button');
-      btn.className = 'ingredient-picker__btn';
-      if (ing.id === 'newyork') {
-        btn.className += ' ingredient-picker__btn--ny';
-        btn.textContent = ing.name + ' · $' + nyPrice;
-      } else {
-        btn.textContent = ing.name;
+    if (isMulti) {
+      // ── Multi-select mode ──
+      var selected = [];
+
+      var counter = document.createElement('div');
+      counter.className = 'ingredient-picker__counter';
+      counter.textContent = '0 de ' + maxIng + ' seleccionados';
+
+      var confirmBtn = document.createElement('button');
+      confirmBtn.className = 'ingredient-picker__confirm';
+      confirmBtn.textContent = 'Confirmar';
+      confirmBtn.disabled = true;
+
+      function updateMultiState() {
+        counter.textContent = selected.length + ' de ' + maxIng + ' seleccionados';
+        confirmBtn.disabled = selected.length < minIng;
+        var btns = grid.querySelectorAll('.ingredient-picker__btn');
+        for (var i = 0; i < btns.length; i++) {
+          var ingId = btns[i].dataset.ingId;
+          var isSelected = selected.indexOf(ingId) !== -1;
+          btns[i].classList.toggle('is-selected', isSelected);
+          btns[i].disabled = !isSelected && selected.length >= maxIng;
+        }
       }
-      btn.addEventListener('click', function () {
-        addIngredientToCart(baseItemId, ing.id, ing.name);
+
+      ingredients.forEach(function (ing) {
+        // Skip combinado from multi-select picker
+        if (ing.id === 'combinado') return;
+        var btn = document.createElement('button');
+        btn.className = 'ingredient-picker__btn';
+        btn.dataset.ingId = ing.id;
+        btn.textContent = ing.name;
+        btn.addEventListener('click', function () {
+          var idx = selected.indexOf(ing.id);
+          if (idx !== -1) {
+            selected.splice(idx, 1);
+          } else if (selected.length < maxIng) {
+            selected.push(ing.id);
+          }
+          updateMultiState();
+        });
+        grid.appendChild(btn);
+      });
+
+      confirmBtn.addEventListener('click', function () {
+        if (selected.length < minIng) return;
+        // Build names array from selected IDs
+        var selectedData = [];
+        for (var s = 0; s < selected.length; s++) {
+          for (var g = 0; g < ingredients.length; g++) {
+            if (ingredients[g].id === selected[s]) {
+              selectedData.push(ingredients[g]);
+              break;
+            }
+          }
+        }
+        addMultiIngredientToCart(baseItemId, selectedData);
         hideIngredientPicker();
       });
-      grid.appendChild(btn);
-    });
+
+      panel.appendChild(title);
+      panel.appendChild(counter);
+      panel.appendChild(grid);
+      panel.appendChild(confirmBtn);
+    } else {
+      // ── Single-select mode (existing) ──
+      ingredients.forEach(function (ing) {
+        var btn = document.createElement('button');
+        btn.className = 'ingredient-picker__btn';
+        if (ing.id === 'newyork') {
+          btn.className += ' ingredient-picker__btn--ny';
+          btn.textContent = ing.name + ' · $' + nyPrice;
+        } else {
+          btn.textContent = ing.name;
+        }
+        btn.addEventListener('click', function () {
+          addIngredientToCart(baseItemId, ing.id, ing.name);
+          hideIngredientPicker();
+        });
+        grid.appendChild(btn);
+      });
+
+      panel.appendChild(title);
+      panel.appendChild(grid);
+    }
 
     var cancel = document.createElement('button');
     cancel.className = 'ingredient-picker__cancel';
     cancel.textContent = 'Cancelar';
     cancel.addEventListener('click', hideIngredientPicker);
 
-    panel.appendChild(title);
-    panel.appendChild(grid);
     panel.appendChild(cancel);
     overlay.appendChild(panel);
     document.body.appendChild(overlay);
@@ -381,6 +456,45 @@
         categoryName: baseItem.categoryName,
         categoryId: baseItem.categoryId,
         ingredientName: ingredientName,
+        baseItemId: baseItemId
+      };
+    }
+
+    cart[compoundId].qty++;
+    updateCartUIForPicker(baseItemId);
+    saveCart();
+
+    // Pulse animation on card
+    var card = worldsTrack.querySelector('[data-item-id="' + baseItemId + '"]');
+    if (card) {
+      card.classList.add('has-items');
+      card.classList.remove('is-pulse');
+      void card.offsetWidth;
+      card.classList.add('is-pulse');
+    }
+
+    updateWorldHeight(activeWorldIndex);
+  }
+
+  function addMultiIngredientToCart(baseItemId, selectedIngredients) {
+    var baseItem = findItemById(baseItemId);
+    if (!baseItem) return;
+
+    // Sort by ID for consistent compound keys
+    var sorted = selectedIngredients.slice().sort(function (a, b) {
+      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+    });
+
+    var compoundId = baseItemId + '--' + sorted.map(function (s) { return s.id; }).join('+');
+    var displayName = sorted.map(function (s) { return s.name; }).join(', ');
+
+    if (!cart[compoundId]) {
+      cart[compoundId] = {
+        item: { id: compoundId, name: baseItem.item.name, price: baseItem.item.price },
+        qty: 0,
+        categoryName: baseItem.categoryName,
+        categoryId: baseItem.categoryId,
+        ingredientName: displayName,
         baseItemId: baseItemId
       };
     }
@@ -965,6 +1079,11 @@
       for (var i = 0; i < keys.length; i++) {
         var entry = parsed[keys[i]];
         if (!entry || !entry.item || !entry.qty) continue;
+        // Skip stale plain entries for items that now require ingredients
+        if (!entry.baseItemId) {
+          var itemRef = findItemById(keys[i]);
+          if (itemRef && itemRef.item.hasIngredients) continue;
+        }
         cart[keys[i]] = entry;
       }
 
@@ -1384,11 +1503,75 @@
     var url = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg);
     window.open(url, '_blank', 'noopener');
 
-    var celebration = document.getElementById('sheet-celebration');
-    if (celebration) {
-      celebration.hidden = false;
-      setTimeout(function () { celebration.hidden = true; }, 4000);
+    showOrderConfirmation();
+  }
+
+  function showOrderConfirmation() {
+    // Remove any existing confirmation modal
+    var existing = document.getElementById('order-confirm-overlay');
+    if (existing) existing.parentNode.removeChild(existing);
+
+    var overlay = document.createElement('div');
+    overlay.className = 'order-confirm-overlay';
+    overlay.id = 'order-confirm-overlay';
+
+    overlay.innerHTML = '<div class="order-confirm">' +
+      '<img src="assets/generated/cart-celebration.webp" alt="Celebracion!" class="order-confirm__img" loading="lazy">' +
+      '<p class="order-confirm__question">Enviaste tu pedido?</p>' +
+      '<div class="order-confirm__actions">' +
+        '<button class="order-confirm__btn order-confirm__btn--yes">Si, lo envie!</button>' +
+        '<button class="order-confirm__btn order-confirm__btn--no">Todavia no</button>' +
+      '</div>' +
+    '</div>';
+
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(function () {
+      overlay.classList.add('is-visible');
+    });
+
+    var btnYes = overlay.querySelector('.order-confirm__btn--yes');
+    var btnNo = overlay.querySelector('.order-confirm__btn--no');
+
+    btnYes.addEventListener('click', function () {
+      clearCart();
+      overlay.querySelector('.order-confirm__question').textContent = 'Pedido enviado! Gracias!';
+      overlay.querySelector('.order-confirm__actions').remove();
+      setTimeout(function () {
+        overlay.classList.remove('is-visible');
+        setTimeout(function () {
+          if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        }, 300);
+        closeSheet();
+      }, 1500);
+    });
+
+    btnNo.addEventListener('click', function () {
+      overlay.classList.remove('is-visible');
+      setTimeout(function () {
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      }, 300);
+    });
+  }
+
+  function clearCart() {
+    cart = {};
+    saveCart();
+
+    // Reset all stepper counts and has-items classes
+    var counts = worldsTrack.querySelectorAll('.stepper__count');
+    for (var i = 0; i < counts.length; i++) {
+      counts[i].textContent = '0';
     }
+    var cards = worldsTrack.querySelectorAll('.menu__item.has-items');
+    for (var j = 0; j < cards.length; j++) {
+      cards[j].classList.remove('has-items');
+    }
+
+    cartBadge.textContent = '0';
+    cartFab.hidden = true;
+    updateSendButton();
+    renderSheet();
   }
 
   // ════════════════════════════════════════════

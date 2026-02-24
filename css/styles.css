@@ -1048,15 +1048,30 @@ html {
 }
 
 .menu__item-promo {
-  display: inline-block;
-  background: var(--promo);
-  color: var(--black);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.15rem 0;
+}
+
+.menu__item-promo-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--promo);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.menu__item-promo-value {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.6rem;
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
+  color: var(--promo);
   letter-spacing: 0.03em;
+  background: rgba(255, 215, 0, 0.12);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
 }
 
 .menu__item-variant {
@@ -1433,6 +1448,88 @@ html {
   margin: 0 auto 1rem;
 }
 
+/* ===== ORDER CONFIRMATION MODAL ===== */
+.order-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.order-confirm-overlay.is-visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.order-confirm {
+  background: var(--black-light);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
+  transform: scale(0.9);
+  transition: transform 0.3s var(--ease-spring);
+}
+
+.order-confirm-overlay.is-visible .order-confirm {
+  transform: scale(1);
+}
+
+.order-confirm__img {
+  width: 180px;
+  margin: 0 auto 1rem;
+  border-radius: 16px;
+  mask-image: radial-gradient(ellipse 70% 70% at center, black 50%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at center, black 50%, transparent 100%);
+}
+
+.order-confirm__question {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--promo);
+  margin-bottom: 1.25rem;
+}
+
+.order-confirm__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.order-confirm__btn {
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-radius: 10px;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.order-confirm__btn:active {
+  transform: scale(0.96);
+}
+
+.order-confirm__btn--yes {
+  background: var(--whatsapp);
+  color: #fff;
+}
+
+.order-confirm__btn--no {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--white-dim);
+}
+
 .bottom-sheet__empty {
   text-align: center;
   padding: 2rem 0;
@@ -1492,6 +1589,12 @@ html {
   color: var(--white-dim);
   margin-bottom: 0.35rem;
   font-weight: 500;
+}
+
+.required-hint {
+  color: var(--orange);
+  font-weight: 400;
+  font-size: 0.75rem;
 }
 
 .bottom-sheet__name input {
@@ -1610,6 +1713,38 @@ html {
 .ingredient-picker__btn--ny {
   border-color: var(--promo);
   color: var(--promo);
+}
+
+.ingredient-picker__btn.is-selected {
+  border-color: var(--orange);
+  background: rgba(255, 111, 0, 0.15);
+}
+
+.ingredient-picker__btn:disabled {
+  opacity: 0.35;
+}
+
+.ingredient-picker__counter {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--white-dim);
+  margin-bottom: 0.75rem;
+}
+
+.ingredient-picker__confirm {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--orange);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+  transition: opacity 0.2s;
+}
+
+.ingredient-picker__confirm:disabled {
+  opacity: 0.35;
 }
 
 .ingredient-picker__cancel {
